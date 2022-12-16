@@ -40,4 +40,7 @@ client.on('messageCreate', async message => {
   } // <--- if(statement) ends here
 }) // <--- client.on(messageCreate) ends here
 
+// Start the bot!
 client.login(process.env.DISCORD_KEY);
+const keepAlive = require('./server');
+keepAlive();
