@@ -32,13 +32,39 @@ client.on('messageCreate', message => {
     }
 }); // <--- ping-pong function ends here
 
-client.on('messageCreate', async message => {
-  if(message.content.startsWith('!')) {
-    let userQuery = message.content.slice(1)
-    const result = await queryGPT(userQuery);
-    message.reply(result);
-  } // <--- if(statement) ends here
-}) // <--- client.on(messageCreate) ends here
+client.api.applications(client.user.id).commands.post({
+  data: {
+    name: 'query',
+    description: 'Queries GPT with a user input',
+    options: [
+      {
+        name: 'input',
+        description: 'User input to query GPT',
+        type: 'STRING',
+        required: true
+      }
+    ]
+  }
+});
+
+
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand() || interaction.commandName !== 'query') return;
+
+  const userQuery = interaction.options.getString('input');
+  const result = await queryGPT(userQuery);
+  interaction.reply(result);
+});
+
+
+
+// client.on('messageCreate', async message => {
+//   if(message.content.startsWith('!')) {
+//     let userQuery = message.content.slice(1)
+//     const result = await queryGPT(userQuery);
+//     message.reply(result);
+//   } // <--- if(statement) ends here
+// }) // <--- client.on(messageCreate) ends here
 
 // Start the bot!
 client.login(process.env.DISCORD_KEY);
