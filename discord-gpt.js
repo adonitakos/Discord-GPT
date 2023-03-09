@@ -32,30 +32,21 @@ client.on('messageCreate', message => {
     }
 }); // <--- ping-pong function ends here
 
-client.api.applications(client.user.id).commands.post({
-  data: {
-    name: 'query',
-    description: 'Queries GPT with a user input',
-    options: [
-      {
-        name: 'input',
-        description: 'User input to query GPT',
-        type: 'STRING',
-        required: true
-      }
-    ]
-  }
-});
+const { SlashCommandBuilder } = require('discord.js');
 
-
-client.on('interactionCreate', async interaction => {
-  if (!interaction.isCommand() || interaction.commandName !== 'query') return;
-
-  const userQuery = interaction.options.getString('input');
-  const result = await queryGPT(userQuery);
-  interaction.reply(result);
-});
-
+module.exports = {
+	data: new SlashCommandBuilder()
+		.setName('GPTQuery')
+		.setDescription('Queries GPT'),
+	async execute(interaction) {
+		// interaction.user is the object representing the User who ran the command
+		// interaction.member is the GuildMember object, which represents the user in the specific guild
+		// await interaction.reply(`This command was run by ${interaction.user.username}, who joined on ${interaction.member.joinedAt}.`);
+    let userQuery = message.content.slice(1)
+    const result = await queryGPT(userQuery);
+    await interaction.reply(result);
+	},
+};
 
 
 // client.on('messageCreate', async message => {
