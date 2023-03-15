@@ -36,7 +36,7 @@ const gptQuery = async(queryPrompt) => {
 
 // =============== Discord Bot Functionality =============== \\
 
-const { Client, Events, GatewayIntentBits, SlashCommandBuilder } = require('discord.js');
+const { Client, Events, GatewayIntentBits, SlashCommandBuilder, SlashCommandStringOption } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]});
 
 client.once(Events.ClientReady, client => {
@@ -58,15 +58,22 @@ client.once(Events.ClientReady, client => {
     .setName('gpt_query')
     .setDescription('Query from GPT-3.5 model')
     .addStringOption(option => 
-      option
-        .setName('query')
-        .setDescription('What you will input to be queried')
-    );
+      option.setName('query')
+        .setDescription('What you will input to be queried'));
+
+  const echo = new SlashCommandBuilder()
+    .setName('echo')
+    .setDescription('Replies with your input!')
+    .addStringOption(option =>
+      option.setName('input')
+        .setDescription('The input to echo back'));
+
 
   // const pingCommand = ping.toJSON();
   client.application.commands.create(ping);
   client.application.commands.create(hello);
   client.application.commands.create(info);
+  client.application.commands.create(echo);
   client.application.commands.create(gpt_query);
 
 }); // <--- client.once() ends here
@@ -87,9 +94,15 @@ client.on(Events.InteractionCreate, async interaction => {
       interaction.reply(information);
     }
 
+    if(interaction.commandName === 'echo') {
+      const input = interaction.options.getString('input');
+      console.log(input);
+      interaction.reply(input);
+    }
+
     if(interaction.commandName === 'gpt_query') {
       const result = await gptQuery(interaction.options.getString('query'));
-      console.log(result)
+      console.log(result);
       interaction.reply(result);
     }
   
@@ -107,18 +120,19 @@ keepAlive();
 
 // ===== Code that might need to be re-used later ===== \\
 
-// client.on('messageCreate', async message => {
-//   if(message.content.startsWith('!')) {
-//     let userQuery = message.content.slice(1)
-//     const result = await gptQuery(userQuery);
-//     message.reply(result);
-//   } // <--- if(statement) ends here
-// }) // <--- client.on(messageCreate) ends here
+client.on('messageCreate', async message => {
+  if(message.content.startsWith('$')) {
+    let userQuery = message.content.slice(1)
+    const result = await gptQuery(userQuery);
+    console.log(result);
+    message.reply(result);
+  } // <--- if(statement) ends here
+}) // <--- client.on(messageCreate) ends here
 
 
-// ! ping command
+// $ ping command
 // client.on('messageCreate', message => {
-//     if (message.content == '!ping') {
+//     if (message.content == '$ping') {
 //       message.reply('Pong!');
 //     }
 // }); // <--- ping-pong function ends here
